@@ -56,12 +56,14 @@ public class LeaveService {
    }
 
     private void sendApprovalEmailAsync(Leave leave){
-        Runnable emailTask = () -> {
-            String msg = "Hello " + leave.getEmployeeName() + ", your leave from " +
-                         leave.getFromDate() + " to " + leave.getToDate() + " has been approved.";
-            System.out.println("Sending Email to " + leave.getEmail() + ": " + msg);
-            try { Thread.sleep(2000); } catch (InterruptedException ignored) {}
-            System.out.println("Email sent successfully to " + leave.getEmail());
+        Runnable emailTask=()->{
+            String msg ="Hello "+leave.getEmployeeName()+", your leave from "+
+                         leave.getFromDate()+" to "+leave.getToDate()+" has been approved.";
+            System.out.println("Sending Email to "+leave.getEmail()+": "+msg);
+            try{ 
+		    Thread.sleep(2000); 
+	      }catch(InterruptedException ignored){}
+            System.out.println("Email sent successfully to "+leave.getEmail());
         };
         new Thread(emailTask).start();
     }

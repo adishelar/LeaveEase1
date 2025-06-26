@@ -55,21 +55,15 @@ public class LeaveController {
 
    
     @PutMapping("/approve/{id}")
-    public ResponseEntity<?> approveLeave(@PathVariable Long id) {
+    public ResponseEntity<?> approveLeave(@PathVariable Long id){
         try {
-            Leave updatedLeave = service.approveLeave(id); // Handles status change + async email
+            Leave updatedLeave =service.approveLeave(id); // Handles status change + async email
             return ResponseEntity.ok(updatedLeave);
-        } catch (NoSuchElementException e) {
+        }catch(NoSuchElementException e){
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                                 .body("Leave with ID " + id + " not found");
+                                 .body("Leave with ID "+id+" not found");
         }
     }
-
-    
-
-
-
-   
 
 
 	@GetMapping("/triggerTask")

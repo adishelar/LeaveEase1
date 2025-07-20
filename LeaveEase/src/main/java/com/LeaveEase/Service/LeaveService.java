@@ -13,60 +13,59 @@ import com.LeaveEase.Repo.LeaveRepository;
 @Service
 public class LeaveService {
 
-	@Autowired
+    @Autowired
     private LeaveRepository repo;
 
     public synchronized Leave applyLeave(Leave leave){
         leave.setStatus("Pending");
         return repo.save(leave);
-     }
-
-    public List<Leave> getAllSortedByName(){
+  }
+ public List<Leave> getAllSortedByName(){
         List<Leave> leaves = repo.findAll();
         leaves.sort(Comparator.comparing(Leave::getEmployeeName));
         return leaves;
-   }
-
-    public List<Leave> getRecentRequests(){
+ }
+  public List<Leave> getRecentRequests(){
         return repo.findTop5ByOrderByIdDesc();
-     }
-
-    public List<Leave> getPendingRequests(){
+      }
+  public List<Leave> getPendingRequests(){
         return repo.findByStatus("Pending");
-    }
-
-    public List<Leave> getApprovedRequests(){
+      }
+ public List<Leave> getApprovedRequests(){
         return repo.findByStatus("Approved");
-    }
-
-    public Leave approveLeave(Long id){
+  }
+  public Leave approveLeave(Long id){
         Leave leave = repo.findById(id).orElseThrow(()->new NoSuchElementException("Leave not found"));
-       leave.setStatus("Approved");
-         Leave updated = repo.save(leave);
-          sendApprovalEmailAsync(leave);
+        leave.setStatus("Approved");
+        Leave updated = repo.save(leave);
+        sendEmail("Approved", leave);
         return updated;
-     }
-
-    public void backgroundTask(){
+    }
+public Leave rejectLeave(Long id){
+        Leave leave = repo.findById(id).orElseThrow(()->new NoSuchElementException("Leave not found"));
+       leave.setStatus("Rejected");
+         Leave updated = repo.save(leave);
+         sendEmail("Rejected", leave);
+          return updated;
+      }
+  public void backgroundTask(){
         Runnable task = ()->{
             List<Leave> pending = repo.findByStatus("Pending");
-             System.out.println("Pending Requests Count: " + pending.size());
-       };
-        new Thread(task).start();
-   }
-
-    private void sendApprovalEmailAsync(Leave leave){
-        Runnable emailTask=()->{
-            String msg ="Hello "+leave.getEmployeeName()+", your leave from "+
-                         leave.getFromDate()+" to "+leave.getToDate()+" has been approved.";
-            System.out.println("Sending Email to "+leave.getEmail()+": "+msg);
-            try{ 
-		    Thread.sleep(2000); 
-	      }catch(InterruptedException ignored){}
-            System.out.println("Email sent successfully to "+leave.getEmail());
+             System.out.println("Pending Requests Count: "+pending.size());
         };
-        new Thread(emailTask).start();
-    }
+           new Thread(task).start();
+ }
+   private void sendEmail(String status, Leave leave){
+        Runnable emailTask = ()->{
+            String msg = "Hello "+leave.getEmployeeName()+",your leave from"+
+                        leave.getFromDate()+"to"+leave.getToDate()+"has been"+status+".";
+            System.out.println("Sending Email to"+leave.getEmail()+":"+msg);
+            try{
+                Thread.sleep(2000);
+            }catch(Exception e){}
+            System.out.println("Email sent to "+leave.getEmail());
+      };
+          new Thread(emailTask).start();
+     }
 
-	
 }

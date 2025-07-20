@@ -5,6 +5,8 @@ import java.util.NoSuchElementException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.*;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,23 +25,6 @@ import com.LeaveEase.Service.LeaveService;
 public class LeaveController {
 
 	@Autowired
-    private LeaveService service;
-
-   package com.LeaveEase.Controller;
-
-import com.LeaveEase.Entity.Leave;
-import com.LeaveEase.Service.LeaveService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.*;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.*;
-
-@RestController
-@RequestMapping("/leave")
-public class LeaveController {
-
-    @Autowired
     private LeaveService service;
 
     @PostMapping("/apply")

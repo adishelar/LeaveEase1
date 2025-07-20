@@ -25,50 +25,54 @@ public class LeaveController {
 	@Autowired
     private LeaveService service;
 
+   package com.LeaveEase.Controller;
+
+import com.LeaveEase.Entity.Leave;
+import com.LeaveEase.Service.LeaveService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.*;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.*;
+
+@RestController
+@RequestMapping("/leave")
+public class LeaveController {
+
+    @Autowired
+    private LeaveService service;
+
     @PostMapping("/apply")
-    public ResponseEntity<Leave> applyLeave(@RequestBody Leave leave){
-          Leave saved = service.applyLeave(leave);
-        return new ResponseEntity<>(saved, HttpStatus.CREATED);
-     }
-
-    
-    @GetMapping("/all")
-    public ResponseEntity<List<Leave>> getAll(){
-        return ResponseEntity.ok(service.getAllSortedByName());
-   }
-
-    @GetMapping("/recent")
-    public ResponseEntity<List<Leave>> getRecentRequests(){
-        return ResponseEntity.ok(service.getRecentRequests());
-    }
-
-    @GetMapping("/pending")
-    public ResponseEntity<List<Leave>> getPendingRequests(){
-        return ResponseEntity.ok(service.getPendingRequests());
-   }
-
-    
-    @GetMapping("/approved")
-    public ResponseEntity<List<Leave>> getApprovedRequests(){
-        return ResponseEntity.ok(service.getApprovedRequests());
-     }
-
-   
-    @PutMapping("/approve/{id}")
-    public ResponseEntity<?> approveLeave(@PathVariable Long id){
+    public ResponseEntity<Leave> apply(@RequestBody Leave leave){
         try {
-            Leave updatedLeave =service.approveLeave(id); // Handles status change + async email
-            return ResponseEntity.ok(updatedLeave);
-        }catch(NoSuchElementException e){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                                 .body("Leave with ID "+id+" not found");
+            Leave saved=service.applyLeave(leave);
+             return new ResponseEntity<>(saved, HttpStatus.CREATED);
+          } catch (Exception e){
+              return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
+     }
+ @GetMapping("/recent")
+    public ResponseEntity<List<Leave>> getRecent(){
+         List<Leave> list=service.getRecentRequests();
+        if(list.isEmpty()) return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+         return new ResponseEntity<>(list, HttpStatus.OK);
     }
+  @GetMapping("/pending")
+     public ResponseEntity<List<Leave>> getPending(){
+         List<Leave> list=service.getPendingRequests();
+        return new ResponseEntity<>(list, HttpStatus.OK);
+    }
+ @PutMapping("/approve/{id}")
+    public ResponseEntity<String> approve(@PathVariable Long id){
+        try{
+            Leave updated=service.approveLeave(id);
+            return new ResponseEntity<>("Leave approved for"+updated.getEmployeeName(),HttpStatus.ACCEPTED);
+        } catch (NoSuchElementException e){
+         return new ResponseEntity<>("Leave not found",HttpStatus.NOT_FOUND);
+         } catch (Exception ex){
+             return new ResponseEntity<>("Something went wrong",HttpStatus.INTERNAL_SERVER_ERROR);
+         }
+  }
 
 
-	@GetMapping("/triggerTask")
-    public ResponseEntity<String> triggerBackgroundTask(){
-        service.backgroundTask();
-        return ResponseEntity.ok("Background Task Started");
-    }
 }
